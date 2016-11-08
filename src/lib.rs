@@ -123,7 +123,8 @@ impl <T: Digest + Clone> PrivateKey<T> {
         self.digest.result(data_hash.as_mut_slice());
         self.digest.reset();
 
-        let mut signature = Vec::new();
+        let signature_len = data_hash.len() * 8;
+        let mut signature = Vec::with_capacity(signature_len);
 
         for i in 0..data_hash.len() {
             let byte = data_hash[i];

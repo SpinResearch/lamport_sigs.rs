@@ -1,0 +1,8 @@
+[package]
+name = "lamport"
+version = "0.1.0"
+authors = ["Frederic Jacobs <github@fredericjacobs.com>"]
+
+[dependencies]
+rust-crypto = "^0.2.36"
+rand = "^0.3"

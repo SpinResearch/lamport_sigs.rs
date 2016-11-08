@@ -169,7 +169,7 @@ impl<T: Digest + Clone> PartialEq for PrivateKey<T> {
         }
 
         for i in 0..self.zero_values.len() {
-            if self.zero_values[i] != self.zero_values[i]  || self.one_values[i] != other.one_values[i] {
+            if self.zero_values[i] != other.zero_values[i] || self.one_values[i] != other.one_values[i] {
                 return false
             }
         }

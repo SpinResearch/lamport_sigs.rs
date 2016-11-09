@@ -1,6 +1,5 @@
 use crypto::sha3::Sha3;
 use PrivateKey;
-use verify_signature;
 
 #[cfg(test)]
 #[test]
@@ -21,7 +20,7 @@ fn test_sign_verif() {
 
     let pub_key = priv_key.public_key();
 
-    assert!(verify_signature(&signature, data, &pub_key));
+    assert!(pub_key.verify_signature(&signature, data));
 }
 
 #[test]
@@ -32,5 +31,5 @@ fn test_sign_verif_fail() {
 
     let pub_key = priv_key.public_key();
     let data2 = "Hello".as_bytes();
-    assert!(!verify_signature(&signature, data2, &pub_key));
+    assert!(!pub_key.verify_signature(&signature, data2));
 }

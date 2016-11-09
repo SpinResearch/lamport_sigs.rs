@@ -4,14 +4,15 @@ extern crate rand;
 use rand::OsRng;
 use rand::Rng;
 use crypto::digest::Digest;
-use std::hash::{Hash, Hasher};
 
+/// A one-time signing public key
 pub struct PublicKey<T: Digest + Clone> {
     zero_values: Vec<Vec<u8>>,
     one_values:  Vec<Vec<u8>>,
     digest: T
 }
 
+/// A one-time signing private key
 pub struct PrivateKey<T: Digest + Clone> {
     zero_values: Vec<Vec<u8>>, // For a n bits hash function: (n * n/8 bytes) for zero_values and one_values
     one_values:  Vec<Vec<u8>>,
@@ -19,53 +20,49 @@ pub struct PrivateKey<T: Digest + Clone> {
     used: bool
 }
 
-impl<D: Digest + Clone> Hash for PrivateKey<D> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let public_key = self.public_key();
-        public_key.one_values.hash(state);
-        public_key.zero_values.hash(state);
-    }
-}
+impl<T: Digest + Clone> PublicKey<T> {
+    /// Verifies that the signature of the data is correctly signed with the given key
+    pub fn verify_signature(    &self,
+                                signature: &Vec<Vec<u8>>,
+                                data:&[u8],
+                                ) -> bool
+    {
+        let mut digest = self.digest.clone();
+        digest.input(data);
+        let mut data_hash = vec![0 as u8; digest.output_bytes()];
+        digest.result(data_hash.as_mut_slice());
+        digest.reset();
 
-pub fn verify_signature<T: Digest + Clone>( signature: &Vec<Vec<u8>>,
-                                            data:&[u8],
-                                            public_key: &PublicKey<T>) -> bool
-{
-
-    let mut digest = public_key.digest.clone();
-    digest.input(data);
-    let mut data_hash = vec![0 as u8; digest.output_bytes()];
-    digest.result(data_hash.as_mut_slice());
-    digest.reset();
-
-    for i in 0..data_hash.len() {
-        let byte = data_hash[i];
-        for j in 0..8 {
-            let offset = i*8 + j;
-            if (byte & (1<<j)) > 0 {
-                digest.input(signature[offset].as_slice());
-                let mut hashed_value = vec![0 as u8; digest.output_bytes()];
-                digest.result(hashed_value.as_mut_slice());
-                digest.reset();
-                if hashed_value != public_key.one_values[offset] {
-                    return false;
-                }
-            } else {
-                digest.input(signature[offset].as_slice());
-                let mut hashed_value = vec![0 as u8; digest.output_bytes()];
-                digest.result(hashed_value.as_mut_slice());
-                digest.reset();
-                if hashed_value != public_key.zero_values[offset] {
-                    return false;
+        for i in 0..data_hash.len() {
+            let byte = data_hash[i];
+            for j in 0..8 {
+                let offset = i*8 + j;
+                if (byte & (1<<j)) > 0 {
+                    digest.input(signature[offset].as_slice());
+                    let mut hashed_value = vec![0 as u8; digest.output_bytes()];
+                    digest.result(hashed_value.as_mut_slice());
+                    digest.reset();
+                    if hashed_value != self.one_values[offset] {
+                        return false;
+                    }
+                } else {
+                    digest.input(signature[offset].as_slice());
+                    let mut hashed_value = vec![0 as u8; digest.output_bytes()];
+                    digest.result(hashed_value.as_mut_slice());
+                    digest.reset();
+                    if hashed_value != self.zero_values[offset] {
+                        return false;
+                    }
                 }
             }
         }
-    }
 
-    return true;
+        return true;
+    }
 }
 
 impl <T: Digest + Clone> PrivateKey<T> {
+    /// Generates a new random one-time signing key. This method can panic if OS RNG fails
     pub fn new(digest: T) -> PrivateKey<T> {
         let generate_bit_hash_values = |hasher: &T| -> Vec<Vec<u8>> {
             let mut rng = match OsRng::new() {
@@ -91,6 +88,7 @@ impl <T: Digest + Clone> PrivateKey<T> {
                             used: false }
     }
 
+    /// Returns the public key associated with this private key
     pub fn public_key(&self) -> PublicKey<T> {
         let mut digest = self.digest.clone();
 
@@ -114,6 +112,9 @@ impl <T: Digest + Clone> PrivateKey<T> {
                             one_values: hashed_one_values,
                             digest: digest }
     }
+
+    /// Signs the data with the private key and returns the result if successful.
+    /// If unsuccesful, an explanation string is returned
     pub fn sign(&mut self, data: &[u8]) ->  Result<Vec<Vec<u8>>, &'static str> {
         if self.used {
             return Err("Attempting to sign more than once.");

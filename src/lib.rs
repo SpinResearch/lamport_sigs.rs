@@ -1,4 +1,6 @@
-pub extern crate crypto;
+//! *lamport* implements one-time hash-based signatures using the Lamport signature scheme.
+
+extern crate crypto;
 extern crate rand;
 
 use rand::OsRng;

@@ -1,7 +1,12 @@
 [package]
-name = "lamport"
+name = "lamport_sigs"
 version = "0.1.0"
 authors = ["Frederic Jacobs <github@fredericjacobs.com>"]
+description = "lamport_sigs is a Rust implementation of the Lamport one-time signature scheme."
+license = "BSD-3-Clause"
+documentation = "https://spinresearch.github.io/lamport.rs/lamport/index.html"
+homepage = "https://github.com/SpinResearch/lamport.rs"
+repository = "https://github.com/SpinResearch/lamport.rs"
 
 [dependencies]
 rust-crypto = "^0.2.36"

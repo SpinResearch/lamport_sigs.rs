@@ -2,6 +2,20 @@ use crypto::sha3::Sha3;
 use PrivateKey;
 
 #[cfg(test)]
+
+#[test]
+fn test_public_key_length_256() {
+    let pk = PrivateKey::new(Sha3::sha3_256());
+    assert!(    pk.public_key().one_values.len() == 256 &&
+                pk.public_key().zero_values.len() == 256);
+}
+#[test]
+fn test_public_key_length_512() {
+    let pk = PrivateKey::new(Sha3::sha3_512());
+    assert!(    pk.public_key().one_values.len() == 512 &&
+                pk.public_key().zero_values.len() == 512);
+}
+
 #[test]
 fn test_distinctive_successive_keygen() {
     let mut past_buff = PrivateKey::new(Sha3::sha3_256());

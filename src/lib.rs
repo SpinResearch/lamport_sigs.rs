@@ -7,7 +7,10 @@ use rand::OsRng;
 use rand::Rng;
 use crypto::digest::Digest;
 
+pub type LamportSignatureData = Vec<Vec<u8>>;
+
 /// A one-time signing public key
+#[derive(Clone)]
 pub struct PublicKey<T: Digest + Clone> {
     zero_values: Vec<Vec<u8>>,
     one_values:  Vec<Vec<u8>>,
@@ -15,6 +18,7 @@ pub struct PublicKey<T: Digest + Clone> {
 }
 
 /// A one-time signing private key
+#[derive(Clone)]
 pub struct PrivateKey<T: Digest + Clone> {
     zero_values: Vec<Vec<u8>>, // For a n bits hash function: (n * n/8 bytes) for zero_values and one_values
     one_values:  Vec<Vec<u8>>,
@@ -22,7 +26,26 @@ pub struct PrivateKey<T: Digest + Clone> {
     used: bool
 }
 
+impl<T: Digest + Clone> From<PublicKey<T>> for Vec<u8> {
+    fn from(original: PublicKey<T>) -> Vec<u8> {
+        original.to_bytes()
+    }
+}
+
 impl<T: Digest + Clone> PublicKey<T> {
+    pub fn values(&self) -> (Vec<Vec<u8>>, Vec<Vec<u8>>) {
+        return (self.zero_values.clone(), self.one_values.clone());
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = self.zero_values.clone();
+        bytes.extend(self.one_values.clone());
+        return bytes.iter().fold(Vec::new(), |mut acc, i| {
+            acc.append(&mut i.clone());
+            return acc
+        });
+    }
+
     /// Verifies that the signature of the data is correctly signed with the given key
     pub fn verify_signature(    &self,
                                 signature: &Vec<Vec<u8>>,
@@ -117,7 +140,7 @@ impl <T: Digest + Clone> PrivateKey<T> {
 
     /// Signs the data with the private key and returns the result if successful.
     /// If unsuccesful, an explanation string is returned
-    pub fn sign(&mut self, data: &[u8]) ->  Result<Vec<Vec<u8>>, &'static str> {
+    pub fn sign(&mut self, data: &[u8]) ->  Result<LamportSignatureData, &'static str> {
         if self.used {
             return Err("Attempting to sign more than once.");
         }
@@ -182,20 +205,4 @@ impl<T: Digest + Clone> PartialEq for PrivateKey<T> {
 }
 
 #[cfg(test)]
-use crypto::sha3::Sha3;
-#[test]
-fn test_public_key_length_256() {
-    let pk = PrivateKey::new(Sha3::sha3_256());
-    assert!(    pk.public_key().one_values.len() == 256 &&
-                pk.public_key().zero_values.len() == 256);
-}
-#[test]
-fn test_public_key_length_512() {
-    let pk = PrivateKey::new(Sha3::sha3_512());
-    assert!(    pk.public_key().one_values.len() == 512 &&
-                pk.public_key().zero_values.len() == 512);
-}
-
-
-#[cfg(test)]
-pub mod test;
+pub mod tests;

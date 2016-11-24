@@ -75,9 +75,7 @@ impl<T: Digest + Clone> PublicKey<T> {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut bytes = self.zero_values.clone();
-        bytes.extend(self.one_values.clone());
-        bytes.iter().fold(Vec::new(), |mut acc, i| {
+        self.zero_values.iter().chain(self.one_values.iter()).fold(Vec::new(), |mut acc, i| {
             acc.append(&mut i.clone());
             acc
         })

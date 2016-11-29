@@ -1,46 +1,46 @@
 //! *lamport* implements one-time hash-based signatures using the Lamport signature scheme.
 
-extern crate crypto;
+extern crate ring;
 extern crate rand;
 
 use rand::OsRng;
 use rand::Rng;
-use crypto::digest::Digest;
+use ring::digest::{ Algorithm, Context };
 
 pub type LamportSignatureData = Vec<Vec<u8>>;
 
 /// A one-time signing public key
 #[derive(Clone)]
-pub struct PublicKey<T: Digest + Clone> {
+pub struct PublicKey {
     zero_values: Vec<Vec<u8>>,
     one_values: Vec<Vec<u8>>,
-    digest: T,
+    algorithm: &'static Algorithm,
 }
 
 /// A one-time signing private key
 #[derive(Clone)]
-pub struct PrivateKey<T: Digest + Clone> {
+pub struct PrivateKey {
     // For a n bits hash function: (n * n/8 bytes) for zero_values and one_values
     zero_values: Vec<Vec<u8>>,
     one_values: Vec<Vec<u8>>,
-    digest: T,
+    algorithm: &'static Algorithm,
     used: bool,
 }
 
-impl<T: Digest + Clone> From<PublicKey<T>> for Vec<u8> {
-    fn from(original: PublicKey<T>) -> Vec<u8> {
+impl From<PublicKey> for Vec<u8> {
+    fn from(original: PublicKey) -> Vec<u8> {
         original.to_bytes()
     }
 }
 
-impl<T: Digest + Clone> PublicKey<T> {
+impl PublicKey {
     pub fn values(&self) -> (Vec<Vec<u8>>, Vec<Vec<u8>>) {
         (self.zero_values.clone(), self.one_values.clone())
     }
 
-    pub fn from_vec(vec: Vec<u8>, digest: T) -> Option<PublicKey<T>> {
+    pub fn from_vec(vec: Vec<u8>, algorithm: &'static Algorithm) -> Option<PublicKey> {
         let size = vec.len();
-        let hash_output_size = digest.output_bytes();
+        let hash_output_size = algorithm.output_len;
 
         let mut zero_values_merged = vec;
         let one_values_merged = zero_values_merged.split_off(size / 2);
@@ -70,7 +70,7 @@ impl<T: Digest + Clone> PublicKey<T> {
         Some(PublicKey {
             zero_values: zero_values,
             one_values: one_values,
-            digest: digest,
+            algorithm: algorithm,
         })
     }
 
@@ -83,28 +83,27 @@ impl<T: Digest + Clone> PublicKey<T> {
 
     /// Verifies that the signature of the data is correctly signed with the given key
     pub fn verify_signature(&self, signature: &LamportSignatureData, data: &[u8]) -> bool {
-        let mut digest = self.digest.clone();
-        digest.input(data);
-        let mut data_hash = vec![0 as u8; digest.output_bytes()];
-        digest.result(data_hash.as_mut_slice());
-        digest.reset();
+        let mut context = Context::new(self.algorithm);
+        context.update(data);
+        let result = context.finish();
+        let data_hash = result.as_ref();
 
         for (i, byte) in data_hash.iter().enumerate() {
             for j in 0..8 {
                 let offset = i * 8 + j;
                 if (byte & (1 << j)) > 0 {
-                    digest.input(signature[offset].as_slice());
-                    let mut hashed_value = vec![0 as u8; digest.output_bytes()];
-                    digest.result(hashed_value.as_mut_slice());
-                    digest.reset();
+                    let mut context = Context::new(self.algorithm);
+                    context.update(signature[offset].as_slice());
+                    let hashed_value = Vec::from(context.finish().as_ref());
+
                     if hashed_value != self.one_values[offset] {
                         return false;
                     }
                 } else {
-                    digest.input(signature[offset].as_slice());
-                    let mut hashed_value = vec![0 as u8; digest.output_bytes()];
-                    digest.result(hashed_value.as_mut_slice());
-                    digest.reset();
+                    let mut context = Context::new(self.algorithm);
+                    context.update(signature[offset].as_slice());
+                    let hashed_value = Vec::from(context.finish().as_ref());
+
                     if hashed_value != self.zero_values[offset] {
                         return false;
                     }
@@ -116,16 +115,16 @@ impl<T: Digest + Clone> PublicKey<T> {
     }
 }
 
-impl<T: Digest + Clone> PrivateKey<T> {
+impl PrivateKey {
     /// Generates a new random one-time signing key. This method can panic if OS RNG fails
-    pub fn new(digest: T) -> PrivateKey<T> {
-        let generate_bit_hash_values = |hasher: &T| -> Vec<Vec<u8>> {
+    pub fn new(algorithm: &'static Algorithm) -> PrivateKey {
+        let generate_bit_hash_values = || -> Vec<Vec<u8>> {
             let mut rng = match OsRng::new() {
                 Ok(g) => g,
                 Err(e) => panic!("Failed to obtain OS RNG: {}", e),
             };
-            let buffer_byte = vec![0 as u8; hasher.output_bytes()];
-            let mut buffer = vec![buffer_byte; hasher.output_bits()];
+            let buffer_byte = vec![0u8; algorithm.output_len];
+            let mut buffer = vec![buffer_byte; algorithm.output_len * 8];
 
             for hash in &mut buffer {
                 rng.fill_bytes(hash)
@@ -136,41 +135,39 @@ impl<T: Digest + Clone> PrivateKey<T> {
             buffer
         };
 
-        let zero_values = generate_bit_hash_values(&digest);
-        let one_values = generate_bit_hash_values(&digest);
+        let zero_values = generate_bit_hash_values();
+        let one_values  = generate_bit_hash_values();
 
         PrivateKey {
             zero_values: zero_values,
             one_values: one_values,
-            digest: digest,
+            algorithm: algorithm,
             used: false,
         }
     }
 
     /// Returns the public key associated with this private key
-    pub fn public_key(&self) -> PublicKey<T> {
-        let mut digest = self.digest.clone();
+    pub fn public_key(&self) -> PublicKey {
+        let hash_values = |x: &Vec<Vec<u8>>| -> Vec<Vec<u8>> {
+            let buffer_byte = vec![0 as u8; self.algorithm.output_len];
+            let mut buffer  = vec![buffer_byte; self.algorithm.output_len * 8];
 
-        let hash_values = |x: &Vec<Vec<u8>>, hash_func: &mut Digest| -> Vec<Vec<u8>> {
-            let buffer_byte = vec![0 as u8; hash_func.output_bytes()];
-            let mut buffer = vec![buffer_byte; hash_func.output_bits()];
-
-            for i in 0..hash_func.output_bits() {
-                hash_func.input(x[i].as_slice());
-                hash_func.result(buffer[i].as_mut_slice());
-                hash_func.reset();
+            for i in 0 .. self.algorithm.output_len * 8 {
+                let mut context = Context::new(self.algorithm);
+                context.update(x[i].as_slice());
+                buffer[i] = Vec::from(context.finish().as_ref());
             }
 
             buffer
         };
 
-        let hashed_zero_values = hash_values(&self.zero_values, &mut digest);
-        let hashed_one_values = hash_values(&self.one_values, &mut digest);
+        let hashed_zero_values = hash_values(&self.zero_values);
+        let hashed_one_values  = hash_values(&self.one_values);
 
         PublicKey {
             zero_values: hashed_zero_values,
             one_values: hashed_one_values,
-            digest: digest,
+            algorithm: self.algorithm,
         }
     }
 
@@ -180,10 +177,11 @@ impl<T: Digest + Clone> PrivateKey<T> {
         if self.used {
             return Err("Attempting to sign more than once.");
         }
-        self.digest.input(data);
-        let mut data_hash = vec![0 as u8; self.digest.output_bytes()];
-        self.digest.result(data_hash.as_mut_slice());
-        self.digest.reset();
+
+        let mut context = Context::new(self.algorithm);
+        context.update(data);
+        let result    = context.finish();
+        let data_hash = result.as_ref();
 
         let signature_len = data_hash.len() * 8;
         let mut signature = Vec::with_capacity(signature_len);
@@ -205,7 +203,7 @@ impl<T: Digest + Clone> PrivateKey<T> {
     }
 }
 
-impl<T: Digest + Clone> Drop for PrivateKey<T> {
+impl Drop for PrivateKey {
     fn drop(&mut self) {
         let zeroize_vector = |vector: &mut Vec<Vec<u8>>| {
             for v2 in vector.iter_mut() {
@@ -220,9 +218,9 @@ impl<T: Digest + Clone> Drop for PrivateKey<T> {
     }
 }
 
-impl<T: Digest + Clone> PartialEq for PrivateKey<T> {
+impl PartialEq for PrivateKey {
     // ⚠️ This is not a constant-time implementation
-    fn eq(&self, other: &PrivateKey<T>) -> bool {
+    fn eq(&self, other: &PrivateKey) -> bool {
         if self.one_values.len() != other.one_values.len() {
             return false;
         }

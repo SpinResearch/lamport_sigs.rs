@@ -9,5 +9,5 @@ homepage = "https://github.com/SpinResearch/lamport.rs"
 repository = "https://github.com/SpinResearch/lamport.rs"
 
 [dependencies]
-rust-crypto = "^0.2.36"
+ring = "0.6.0-alpha"
 rand = "^0.3"

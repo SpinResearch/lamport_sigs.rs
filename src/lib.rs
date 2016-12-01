@@ -1,5 +1,13 @@
 //! *lamport* implements one-time hash-based signatures using the Lamport signature scheme.
 
+#![deny(
+    missing_docs,
+    missing_debug_implementations, missing_copy_implementations,
+    trivial_casts, trivial_numeric_casts,
+    unsafe_code, unstable_features,
+    unused_import_braces, unused_qualifications
+)]
+
 extern crate ring;
 extern crate rand;
 
@@ -7,10 +15,11 @@ use rand::OsRng;
 use rand::Rng;
 use ring::digest::{ Algorithm, Context };
 
+/// A type alias defining a Lamport signature
 pub type LamportSignatureData = Vec<Vec<u8>>;
 
 /// A one-time signing public key
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PublicKey {
     zero_values: Vec<Vec<u8>>,
     one_values: Vec<Vec<u8>>,
@@ -18,7 +27,7 @@ pub struct PublicKey {
 }
 
 /// A one-time signing private key
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PrivateKey {
     // For a n bits hash function: (n * n/8 bytes) for zero_values and one_values
     zero_values: Vec<Vec<u8>>,
@@ -34,10 +43,8 @@ impl From<PublicKey> for Vec<u8> {
 }
 
 impl PublicKey {
-    pub fn values(&self) -> (Vec<Vec<u8>>, Vec<Vec<u8>>) {
-        (self.zero_values.clone(), self.one_values.clone())
-    }
-
+    /// Intializes a public key with a byte vector.
+    /// Returns `None` if it couldn't parse the provided data
     pub fn from_vec(vec: Vec<u8>, algorithm: &'static Algorithm) -> Option<PublicKey> {
         let size = vec.len();
         let hash_output_size = algorithm.output_len;
@@ -74,6 +81,7 @@ impl PublicKey {
         })
     }
 
+    /// Serializes a public key into a byte vector
     pub fn to_bytes(&self) -> Vec<u8> {
         self.zero_values.iter().chain(self.one_values.iter()).fold(Vec::new(), |mut acc, i| {
             acc.append(&mut i.clone());
@@ -130,8 +138,6 @@ impl PrivateKey {
                 rng.fill_bytes(hash)
             }
 
-            println!("{:?}", buffer);
-
             buffer
         };
 
@@ -149,7 +155,7 @@ impl PrivateKey {
     /// Returns the public key associated with this private key
     pub fn public_key(&self) -> PublicKey {
         let hash_values = |x: &Vec<Vec<u8>>| -> Vec<Vec<u8>> {
-            let buffer_byte = vec![0 as u8; self.algorithm.output_len];
+            let buffer_byte = vec![0u8; self.algorithm.output_len];
             let mut buffer  = vec![buffer_byte; self.algorithm.output_len * 8];
 
             for i in 0 .. self.algorithm.output_len * 8 {

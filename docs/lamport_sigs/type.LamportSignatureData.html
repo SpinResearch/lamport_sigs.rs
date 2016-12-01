@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `PublicKey` struct in crate `lamport`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, PublicKey">
+    <meta name="description" content="API documentation for the Rust `LamportSignatureData` type in crate `lamport_sigs`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, LamportSignatureData">
 
-    <title>lamport::PublicKey - Rust</title>
+    <title>lamport_sigs::LamportSignatureData - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>lamport</a></p><script>window.sidebarCurrent = {name: 'PublicKey', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>lamport_sigs</a></p><script>window.sidebarCurrent = {name: 'LamportSignatureData', ty: 'type', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -42,17 +42,14 @@
         </form>
     </nav>
 
-    <section id='main' class="content struct">
-<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>lamport</a>::<wbr><a class='struct' href=''>PublicKey</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content type">
+<h1 class='fqn'><span class='in-band'>Type Definition <a href='index.html'>lamport_sigs</a>::<wbr><a class='type' href=''>LamportSignatureData</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-9' class='srclink' href='../src/lamport/src/lib.rs.html#11-15' title='goto source code'>[src]</a></span></h1>
-<pre class='rust struct'>pub struct PublicKey&lt;T:&nbsp;Digest + <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; { /* fields omitted */ }</pre><div class='docblock'><p>A one-time signing public key</p>
-</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;T:&nbsp;Digest + <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>&gt; <a class='struct' href='../lamport/struct.PublicKey.html' title='lamport::PublicKey'>PublicKey</a>&lt;T&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a id='src-20' class='srclink' href='../src/lamport/src/lib.rs.html#25-64' title='goto source code'>[src]</a></span></h3>
-<div class='impl-items'><h4 id='method.verify_signature' class='method'><span id='verify_signature.v' class='invisible'><code>fn <a href='#method.verify_signature' class='fnname'>verify_signature</a>(&amp;self, signature: &amp;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;&gt;, data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
-<div class='docblock'><p>Verifies that the signature of the data is correctly signed with the given key</p>
-</div></div></section>
+               </span><a id='src-9' class='srclink' href='../src/lamport_sigs/src/lib.rs.html#19' title='goto source code'>[src]</a></span></h1>
+<pre class='rust typedef'>type LamportSignatureData = <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;&gt;;</pre><div class='docblock'><p>A type alias defining a Lamport signature</p>
+</div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -107,10 +104,12 @@
 
     <script>
         window.rootPath = "../";
-        window.currentCrate = "lamport";
+        window.currentCrate = "lamport_sigs";
+        window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>
     <script src="../main.js"></script>
+    
     <script defer src="../search-index.js"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@
 
 ## Documentation
 
-Documentation is [available](https://spinresearch.github.io/lamport.rs/lamport/index.html).
+Documentation is [available](https://spinresearch.github.io/lamport.rs/lamport_sigs/).
 
 ## Bug Reporting
 

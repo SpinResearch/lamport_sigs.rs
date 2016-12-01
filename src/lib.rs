@@ -1,7 +1,7 @@
 //! *lamport* implements one-time hash-based signatures using the Lamport signature scheme.
 
 #![deny(
-    // missing_docs,
+    missing_docs,
     missing_debug_implementations, missing_copy_implementations,
     trivial_casts, trivial_numeric_casts,
     unsafe_code, unstable_features,
@@ -15,6 +15,7 @@ use rand::OsRng;
 use rand::Rng;
 use ring::digest::{ Algorithm, Context };
 
+/// A type alias defining a Lamport signature
 pub type LamportSignatureData = Vec<Vec<u8>>;
 
 /// A one-time signing public key
@@ -42,11 +43,8 @@ impl From<PublicKey> for Vec<u8> {
 }
 
 impl PublicKey {
-
-    pub fn values(&self) -> (Vec<Vec<u8>>, Vec<Vec<u8>>) {
-        (self.zero_values.clone(), self.one_values.clone())
-    }
-
+    /// Intializes a public key with a byte vector.
+    /// Returns `None` if it couldn't parse the provided data
     pub fn from_vec(vec: Vec<u8>, algorithm: &'static Algorithm) -> Option<PublicKey> {
         let size = vec.len();
         let hash_output_size = algorithm.output_len;
@@ -83,6 +81,7 @@ impl PublicKey {
         })
     }
 
+    /// Serializes a public key into a byte vector
     pub fn to_bytes(&self) -> Vec<u8> {
         self.zero_values.iter().chain(self.one_values.iter()).fold(Vec::new(), |mut acc, i| {
             acc.append(&mut i.clone());

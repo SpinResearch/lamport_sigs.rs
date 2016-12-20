@@ -11,9 +11,10 @@
 extern crate ring;
 extern crate rand;
 
+use std::hash::{Hash, Hasher};
 use rand::OsRng;
 use rand::Rng;
-use ring::digest::{ Algorithm, Context };
+use ring::digest::{Algorithm, Context};
 
 /// A type alias defining a Lamport signature
 pub type LamportSignatureData = Vec<Vec<u8>>;
@@ -25,6 +26,26 @@ pub struct PublicKey {
     one_values: Vec<Vec<u8>>,
     algorithm: &'static Algorithm,
 }
+
+impl PartialEq for PublicKey {
+    #[allow(trivial_casts)]
+    fn eq(&self, other: &Self) -> bool {
+       self.zero_values == other.zero_values &&
+       self.one_values == other.one_values &&
+       self.algorithm as *const Algorithm as usize == other.algorithm as *const Algorithm as usize
+   }
+}
+
+impl Hash for PublicKey {
+    #[allow(trivial_casts)]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.zero_values.hash(state);
+        self.one_values.hash(state);
+        (self.algorithm as *const Algorithm as usize).hash(state);
+    }
+}
+
+impl Eq for PublicKey {}
 
 /// A one-time signing private key
 #[derive(Clone, Debug)]

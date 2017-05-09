@@ -9,6 +9,5 @@ homepage = "https://github.com/SpinResearch/lamport.rs"
 repository = "https://github.com/SpinResearch/lamport.rs"
 
 [dependencies]
-ring = "^0.6.0"
+ring = "^0.9.3"
 rand = "^0.3.0"
-

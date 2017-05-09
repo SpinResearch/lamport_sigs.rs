@@ -7,6 +7,9 @@ license = "BSD-3-Clause"
 documentation = "https://spinresearch.github.io/lamport.rs/lamport/index.html"
 homepage = "https://github.com/SpinResearch/lamport.rs"
 repository = "https://github.com/SpinResearch/lamport.rs"
+keywords = ["lamport", "signature-scheme"]
+categories = ["cryptography", "algorithms"]
+readme = "README.md"
 
 [dependencies]
 ring = "^0.6.0"

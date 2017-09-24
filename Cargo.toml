@@ -1,6 +1,6 @@
 [package]
 name = "lamport_sigs"
-version = "0.5.0"
+version = "0.5.1-pre"
 authors = ["Frederic Jacobs <github@fredericjacobs.com>"]
 description = "lamport_sigs is a Rust implementation of the Lamport one-time signature scheme."
 license = "BSD-3-Clause"

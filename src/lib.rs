@@ -11,6 +11,7 @@
 extern crate ring;
 extern crate rand;
 
+use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use rand::OsRng;
 use rand::Rng;
@@ -30,10 +31,30 @@ pub struct PublicKey {
 impl PartialEq for PublicKey {
     #[allow(trivial_casts)]
     fn eq(&self, other: &Self) -> bool {
-       self.zero_values == other.zero_values &&
-       self.one_values == other.one_values &&
-       self.algorithm as *const Algorithm == other.algorithm as *const Algorithm
-   }
+        self.algorithm as *const Algorithm == other.algorithm as *const Algorithm &&
+            self.zero_values == other.zero_values && self.one_values == other.one_values
+    }
+}
+
+impl Eq for PublicKey {}
+
+impl PartialOrd for PublicKey {
+    fn partial_cmp(&self, other: &PublicKey) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for PublicKey {
+    #[allow(trivial_casts)]
+    fn cmp(&self, other: &PublicKey) -> Ordering {
+        self.zero_values
+            .cmp(&other.zero_values)
+            .then(self.one_values.cmp(&other.one_values))
+            .then((self.algorithm as *const Algorithm).cmp(
+                &(other.algorithm as
+                      *const Algorithm),
+            ))
+    }
 }
 
 impl Hash for PublicKey {
@@ -44,8 +65,6 @@ impl Hash for PublicKey {
         (self.algorithm as *const Algorithm).hash(state);
     }
 }
-
-impl Eq for PublicKey {}
 
 /// A one-time signing private key
 #[derive(Clone, Debug)]
@@ -104,10 +123,13 @@ impl PublicKey {
 
     /// Serializes a public key into a byte vector
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.zero_values.iter().chain(self.one_values.iter()).fold(Vec::new(), |mut acc, i| {
-            acc.append(&mut i.clone());
-            acc
-        })
+        self.zero_values.iter().chain(self.one_values.iter()).fold(
+            Vec::new(),
+            |mut acc, i| {
+                acc.append(&mut i.clone());
+                acc
+            },
+        )
     }
 
     /// Verifies that the signature of the data is correctly signed with the given key
@@ -163,7 +185,7 @@ impl PrivateKey {
         };
 
         let zero_values = generate_bit_hash_values();
-        let one_values  = generate_bit_hash_values();
+        let one_values = generate_bit_hash_values();
 
         PrivateKey {
             zero_values: zero_values,
@@ -177,9 +199,9 @@ impl PrivateKey {
     pub fn public_key(&self) -> PublicKey {
         let hash_values = |x: &Vec<Vec<u8>>| -> Vec<Vec<u8>> {
             let buffer_byte = vec![0u8; self.algorithm.output_len];
-            let mut buffer  = vec![buffer_byte; self.algorithm.output_len * 8];
+            let mut buffer = vec![buffer_byte; self.algorithm.output_len * 8];
 
-            for i in 0 .. self.algorithm.output_len * 8 {
+            for i in 0..self.algorithm.output_len * 8 {
                 let mut context = Context::new(self.algorithm);
                 context.update(x[i].as_slice());
                 buffer[i] = Vec::from(context.finish().as_ref());
@@ -189,7 +211,7 @@ impl PrivateKey {
         };
 
         let hashed_zero_values = hash_values(&self.zero_values);
-        let hashed_one_values  = hash_values(&self.one_values);
+        let hashed_one_values = hash_values(&self.one_values);
 
         PublicKey {
             zero_values: hashed_zero_values,
@@ -207,7 +229,7 @@ impl PrivateKey {
 
         let mut context = Context::new(self.algorithm);
         context.update(data);
-        let result    = context.finish();
+        let result = context.finish();
         let data_hash = result.as_ref();
 
         let signature_len = data_hash.len() * 8;
@@ -232,11 +254,9 @@ impl PrivateKey {
 
 impl Drop for PrivateKey {
     fn drop(&mut self) {
-        let zeroize_vector = |vector: &mut Vec<Vec<u8>>| {
-            for v2 in vector.iter_mut() {
-                for byte in v2.iter_mut() {
-                    *byte = 0;
-                }
+        let zeroize_vector = |vector: &mut Vec<Vec<u8>>| for v2 in vector.iter_mut() {
+            for byte in v2.iter_mut() {
+                *byte = 0;
             }
         };
 
@@ -257,11 +277,31 @@ impl PartialEq for PrivateKey {
 
         for i in 0..self.zero_values.len() {
             if self.zero_values[i] != other.zero_values[i] ||
-               self.one_values[i] != other.one_values[i] {
+                self.one_values[i] != other.one_values[i]
+            {
                 return false;
             }
         }
         true
+    }
+}
+
+impl Eq for PrivateKey {}
+
+impl PartialOrd for PrivateKey {
+    fn partial_cmp(&self, other: &PrivateKey) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for PrivateKey {
+    // ⚠️ This is not a constant-time implementation
+    fn cmp(&self, other: &PrivateKey) -> Ordering {
+        self.one_values.cmp(&other.one_values).then(
+            self.zero_values.cmp(
+                &other.zero_values,
+            ),
+        )
     }
 }
 

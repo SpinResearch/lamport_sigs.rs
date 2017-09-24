@@ -2,7 +2,7 @@
 name = "lamport_sigs"
 version = "0.5.1-pre"
 authors = ["Frederic Jacobs <github@fredericjacobs.com>"]
-description = "lamport_sigs is a Rust implementation of the Lamport one-time signature scheme."
+description = "Implementation of the Lamport one-time signature scheme."
 license = "BSD-3-Clause"
 documentation = "https://spinresearch.github.io/lamport_sigs.rs/lamport_sigs/index.html"
 homepage = "https://github.com/SpinResearch/lamport_sigs.rs"

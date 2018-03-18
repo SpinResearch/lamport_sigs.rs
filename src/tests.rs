@@ -65,6 +65,18 @@ fn test_serialization() {
     assert_eq!(pub_key.zero_values, recovered_pub_key.zero_values);
 }
 
+fn test_serialization_wrong_size_key() {
+    let pub_key = PrivateKey::new(digest_512).public_key();
+    let mut too_short = pub_key.to_bytes();
+    let extra = too_short.pop();
+    assert!(PublicKey::from_vec(too_short, digest_512).is_none());
+
+    let pub_key = PrivateKey::new(digest_512).public_key();
+    let mut too_long = pub_key.to_bytes();
+    too_long.extend(extra);
+    assert!(PublicKey::from_vec(too_long, digest_512).is_none());
+}
+
 #[test]
 #[should_panic]
 fn test_serialization_panic() {

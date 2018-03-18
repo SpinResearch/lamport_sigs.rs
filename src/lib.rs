@@ -88,6 +88,9 @@ impl PublicKey {
     pub fn from_vec(vec: Vec<u8>, algorithm: &'static Algorithm) -> Option<PublicKey> {
         let size = vec.len();
         let hash_output_size = algorithm.output_len;
+        if size != (hash_output_size * hash_output_size * 8 * 2) {
+            return None;
+        }
 
         let mut zero_values_merged = vec;
         let one_values_merged = zero_values_merged.split_off(size / 2);

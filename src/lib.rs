@@ -271,17 +271,24 @@ impl Drop for PrivateKey {
 impl PartialEq for PrivateKey {
     // ⚠️ This is not a constant-time implementation
     fn eq(&self, other: &PrivateKey) -> bool {
-        if self.one_values.len() != other.one_values.len() {
+        if self.algorithm != other.algorithm {
             return false;
         }
-        if self.zero_values.len() != other.zero_values.len() {
+        // NOTE: The `zero_values` and `one_values` need not be of the
+        // the same length (and maybe this should change).
+        let zero_size = self.zero_values.len();
+        let one_size = self.one_values.len();
+        if zero_size != other.zero_values.len() || one_size != other.one_values.len() {
             return false;
         }
 
-        for i in 0..self.zero_values.len() {
-            if self.zero_values[i] != other.zero_values[i] ||
-                self.one_values[i] != other.one_values[i]
-            {
+        for i in 0..zero_size {
+            if self.zero_values[i] != other.zero_values[i] {
+                return false;
+            }
+        }
+        for i in 0..one_size {
+            if self.one_values[i] != other.one_values[i] {
                 return false;
             }
         }

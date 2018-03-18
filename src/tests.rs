@@ -88,3 +88,27 @@ fn test_serialization_panic() {
     assert_eq!(pub_key.one_values, recovered_pub_key.one_values);
     assert_eq!(pub_key.zero_values, recovered_pub_key.zero_values);
 }
+
+#[test]
+fn test_private_key_equality() {
+    let mut pub_key = PrivateKey::new(digest_512);
+    let pub_key_2 = pub_key.clone();
+
+    assert!(pub_key == pub_key_2);
+
+    pub_key.one_values.push(vec![0]);
+
+    assert!(pub_key != pub_key_2);
+
+    let mut pub_key = PrivateKey::new(digest_512);
+    let pub_key_2 = pub_key.clone();
+    pub_key.one_values.pop();
+
+    assert!(pub_key != pub_key_2);
+
+    let mut pub_key = PrivateKey::new(digest_512);
+    let pub_key_2 = pub_key.clone();
+    pub_key.algorithm = digest_256;
+
+    assert!(pub_key != pub_key_2);
+}

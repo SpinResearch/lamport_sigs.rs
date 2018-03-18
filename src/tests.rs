@@ -45,6 +45,25 @@ fn test_sign_verif() {
 }
 
 #[test]
+fn test_sign_verif_sig_wrong_size() {
+    let mut priv_key = PrivateKey::new(digest_512);
+    let data = "Hello World".as_bytes();
+    let mut too_short = priv_key.sign(data).unwrap();
+    let extra = too_short.pop();
+
+    let pub_key = priv_key.public_key();
+
+    assert!(!pub_key.verify_signature(&too_short, data));
+
+    let mut priv_key = PrivateKey::new(digest_512);
+    let data = "Hello World".as_bytes();
+    let mut too_long = priv_key.sign(data).unwrap();
+    too_long.extend(extra);
+
+    assert!(!pub_key.verify_signature(&too_long, data));
+}
+
+#[test]
 fn test_sign_verif_fail() {
     let mut priv_key = PrivateKey::new(digest_512);
     let data = "Hello Word".as_bytes();

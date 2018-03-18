@@ -134,6 +134,10 @@ impl PublicKey {
 
     /// Verifies that the signature of the data is correctly signed with the given key
     pub fn verify_signature(&self, signature: &LamportSignatureData, data: &[u8]) -> bool {
+        if signature.len() != self.algorithm.output_len * 8 {
+            return false;
+        }
+        
         let mut context = Context::new(self.algorithm);
         context.update(data);
         let result = context.finish();

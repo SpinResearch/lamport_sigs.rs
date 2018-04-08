@@ -1,5 +1,5 @@
 # lamport_sigs
-[![Build Status](https://travis-ci.org/SpinResearch/lamport.rs.svg?branch=master&style=flat)](https://travis-ci.org/SpinResearch/lamport.rs)
+[![Build Status](https://travis-ci.org/SpinResearch/lamport_sigs.rs.svg?branch=master&style=flat)](https://travis-ci.org/SpinResearch/lamport_sigs.rs)
 [![Available on Crates.io as lamport_sigs](https://img.shields.io/crates/v/lamport_sigs.svg)](https://crates.io/crates/lamport_sigs)
 ![License](https://img.shields.io/badge/license-bsd3-brightgreen.svg?style=flat)
 

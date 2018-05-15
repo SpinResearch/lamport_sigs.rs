@@ -1,4 +1,3 @@
-
 use ring::digest::{Algorithm, SHA256, SHA512};
 
 use PrivateKey;

@@ -1,21 +1,17 @@
 //! *lamport* implements one-time hash-based signatures using the Lamport signature scheme.
 
-#![deny(
-    missing_docs,
-    missing_debug_implementations, missing_copy_implementations,
-    trivial_casts, trivial_numeric_casts,
-    unsafe_code, unstable_features,
-    unused_import_braces, unused_qualifications
-)]
+#![deny(missing_docs, missing_debug_implementations, missing_copy_implementations, trivial_casts,
+        trivial_numeric_casts, unsafe_code, unstable_features, unused_import_braces,
+        unused_qualifications)]
 
-extern crate ring;
 extern crate rand;
+extern crate ring;
 
-use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
 use rand::OsRng;
 use rand::Rng;
 use ring::digest::{Algorithm, Context};
+use std::cmp::Ordering;
+use std::hash::{Hash, Hasher};
 
 /// A type alias defining a Lamport signature
 pub type LamportSignatureData = Vec<Vec<u8>>;
@@ -31,8 +27,8 @@ pub struct PublicKey {
 impl PartialEq for PublicKey {
     #[allow(trivial_casts)]
     fn eq(&self, other: &Self) -> bool {
-        self.algorithm as *const Algorithm == other.algorithm as *const Algorithm &&
-            self.zero_values == other.zero_values && self.one_values == other.one_values
+        self.algorithm as *const Algorithm == other.algorithm as *const Algorithm
+            && self.zero_values == other.zero_values && self.one_values == other.one_values
     }
 }
 
@@ -50,10 +46,7 @@ impl Ord for PublicKey {
         self.zero_values
             .cmp(&other.zero_values)
             .then(self.one_values.cmp(&other.one_values))
-            .then((self.algorithm as *const Algorithm).cmp(
-                &(other.algorithm as
-                      *const Algorithm),
-            ))
+            .then((self.algorithm as *const Algorithm).cmp(&(other.algorithm as *const Algorithm)))
     }
 }
 
@@ -126,13 +119,13 @@ impl PublicKey {
 
     /// Serializes a public key into a byte vector
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.zero_values.iter().chain(self.one_values.iter()).fold(
-            Vec::new(),
-            |mut acc, i| {
+        self.zero_values
+            .iter()
+            .chain(self.one_values.iter())
+            .fold(Vec::new(), |mut acc, i| {
                 acc.append(&mut i.clone());
                 acc
-            },
-        )
+            })
     }
 
     /// Verifies that the signature of the data is correctly signed with the given key
@@ -140,7 +133,7 @@ impl PublicKey {
         if signature.len() != self.algorithm.output_len * 8 {
             return false;
         }
-        
+
         let mut context = Context::new(self.algorithm);
         context.update(data);
         let result = context.finish();
@@ -261,9 +254,11 @@ impl PrivateKey {
 
 impl Drop for PrivateKey {
     fn drop(&mut self) {
-        let zeroize_vector = |vector: &mut Vec<Vec<u8>>| for v2 in vector.iter_mut() {
-            for byte in v2.iter_mut() {
-                *byte = 0;
+        let zeroize_vector = |vector: &mut Vec<Vec<u8>>| {
+            for v2 in vector.iter_mut() {
+                for byte in v2.iter_mut() {
+                    *byte = 0;
+                }
             }
         };
 
@@ -311,11 +306,9 @@ impl PartialOrd for PrivateKey {
 impl Ord for PrivateKey {
     // ⚠️ This is not a constant-time implementation
     fn cmp(&self, other: &PrivateKey) -> Ordering {
-        self.one_values.cmp(&other.one_values).then(
-            self.zero_values.cmp(
-                &other.zero_values,
-            ),
-        )
+        self.one_values
+            .cmp(&other.one_values)
+            .then(self.zero_values.cmp(&other.zero_values))
     }
 }
 

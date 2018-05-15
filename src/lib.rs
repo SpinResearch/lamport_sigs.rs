@@ -13,9 +13,6 @@ use ring::digest::{Algorithm, Context};
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 
-/// A type alias defining a Lamport signature
-pub type LamportSignatureData = Vec<Vec<u8>>;
-
 /// A one-time signing public key
 #[derive(Clone, Debug)]
 pub struct PublicKey {
@@ -111,9 +108,9 @@ impl PublicKey {
         }
 
         Some(PublicKey {
-            zero_values: zero_values,
-            one_values: one_values,
-            algorithm: algorithm,
+            zero_values,
+            one_values,
+            algorithm,
         })
     }
 
@@ -129,7 +126,7 @@ impl PublicKey {
     }
 
     /// Verifies that the signature of the data is correctly signed with the given key
-    pub fn verify_signature(&self, signature: &LamportSignatureData, data: &[u8]) -> bool {
+    pub fn verify_signature(&self, signature: &[Vec<u8>], data: &[u8]) -> bool {
         if signature.len() != self.algorithm.output_len * 8 {
             return false;
         }
@@ -188,9 +185,9 @@ impl PrivateKey {
         let one_values = generate_bit_hash_values();
 
         PrivateKey {
-            zero_values: zero_values,
-            one_values: one_values,
-            algorithm: algorithm,
+            zero_values,
+            one_values,
+            algorithm,
             used: false,
         }
     }
@@ -222,7 +219,7 @@ impl PrivateKey {
 
     /// Signs the data with the private key and returns the result if successful.
     /// If unsuccesful, an explanation string is returned
-    pub fn sign(&mut self, data: &[u8]) -> Result<LamportSignatureData, &'static str> {
+    pub fn sign(&mut self, data: &[u8]) -> Result<Vec<Vec<u8>>, &'static str> {
         if self.used {
             return Err("Attempting to sign more than once.");
         }

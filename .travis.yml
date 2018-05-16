@@ -21,6 +21,12 @@ matrix:
         - rustup component add rustfmt-preview
       script:
         - cargo fmt --all -- --check
+    - env: NAME='clippy'
+      rust: nightly-2018-07-22
+      before_script:
+        - rustup component add clippy-preview
+      script:
+        - cargo clippy --all --all-features -- -D clippy
     - env: NAME='kcov'
       sudo: required # travis-ci/travis-ci#9061
       before_script:

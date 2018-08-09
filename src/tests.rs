@@ -83,6 +83,7 @@ fn test_serialization() {
     assert_eq!(pub_key.zero_values, recovered_pub_key.zero_values);
 }
 
+#[test]
 fn test_serialization_wrong_size_key() {
     let pub_key = PrivateKey::new(digest_512).public_key();
     let mut too_short = pub_key.to_bytes();

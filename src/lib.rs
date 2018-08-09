@@ -8,7 +8,7 @@ extern crate rand;
 extern crate ring;
 
 use rand::OsRng;
-use rand::Rng;
+use rand::RngCore;
 use ring::digest::{Algorithm, Context};
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};

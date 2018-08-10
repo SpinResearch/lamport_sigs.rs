@@ -1,8 +1,16 @@
 //! *lamport* implements one-time hash-based signatures using the Lamport signature scheme.
 
-#![deny(missing_docs, missing_debug_implementations, missing_copy_implementations, trivial_casts,
-        trivial_numeric_casts, unsafe_code, unstable_features, unused_import_braces,
-        unused_qualifications)]
+#![deny(
+    missing_docs,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unsafe_code,
+    unstable_features,
+    unused_import_braces,
+    unused_qualifications
+)]
 
 extern crate rand;
 extern crate ring;
@@ -25,7 +33,8 @@ impl PartialEq for PublicKey {
     #[allow(trivial_casts)]
     fn eq(&self, other: &Self) -> bool {
         self.algorithm as *const Algorithm == other.algorithm as *const Algorithm
-            && self.zero_values == other.zero_values && self.one_values == other.one_values
+            && self.zero_values == other.zero_values
+            && self.one_values == other.one_values
     }
 }
 

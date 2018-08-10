@@ -1,6 +1,6 @@
 [package]
 name = "lamport_sigs"
-version = "0.5.1-pre"
+version = "0.6.0"
 authors = ["Frederic Jacobs <github@fredericjacobs.com>"]
 description = "Implementation of the Lamport one-time signature scheme."
 license = "BSD-3-Clause"

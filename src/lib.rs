@@ -12,12 +12,10 @@
     unused_qualifications
 )]
 
-extern crate rand;
 extern crate ring;
 
-use rand::OsRng;
-use rand::RngCore;
 use ring::digest::{Algorithm, Context};
+use ring::rand::{SecureRandom, SystemRandom};
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 
@@ -176,15 +174,14 @@ impl PrivateKey {
     /// Generates a new random one-time signing key. This method can panic if OS RNG fails
     pub fn new(algorithm: &'static Algorithm) -> PrivateKey {
         let generate_bit_hash_values = || -> Vec<Vec<u8>> {
-            let mut rng = match OsRng::new() {
-                Ok(g) => g,
-                Err(e) => panic!("Failed to obtain OS RNG: {}", e),
-            };
+            let rng = SystemRandom::new();
+
             let buffer_byte = vec![0u8; algorithm.output_len];
             let mut buffer = vec![buffer_byte; algorithm.output_len * 8];
 
             for hash in &mut buffer {
-                rng.fill_bytes(hash)
+                rng.fill(hash)
+                    .expect("Unable to fill buffer with random data");
             }
 
             buffer
@@ -274,7 +271,7 @@ impl Drop for PrivateKey {
 }
 
 impl PartialEq for PrivateKey {
-    // ⚠️ This is not a constant-time implementation
+    // ⚠️  This is not a constant-time implementation
     fn eq(&self, other: &PrivateKey) -> bool {
         if self.algorithm != other.algorithm {
             return false;
@@ -310,7 +307,7 @@ impl PartialOrd for PrivateKey {
 }
 
 impl Ord for PrivateKey {
-    // ⚠️ This is not a constant-time implementation
+    // ⚠️  This is not a constant-time implementation
     fn cmp(&self, other: &PrivateKey) -> Ordering {
         self.one_values
             .cmp(&other.one_values)

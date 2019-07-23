@@ -6,8 +6,6 @@ rust:
   - beta
 
 matrix:
-  # Since this item is allowed to fail, don't wait for it's result to mark the
-  # build complete.
   fast_finish: true
   allow_failures:
     - env: NAME='nightly'
@@ -15,12 +13,14 @@ matrix:
   include:
     - env: NAME='nightly'
       rust: nightly
-    - env: NAME='rustfmt'
-      rust: nightly
+
+    - env: NAME='clippy'
+      rust: nightly-2019-07-19
       before_script:
-        - rustup component add rustfmt-preview
+        - rustup component add clippy
       script:
-        - cargo fmt --all -- --check
+        - cargo clippy --all --all-features -- -D clippy::all
+
     - env: NAME='kcov'
       sudo: required # travis-ci/travis-ci#9061
       before_script:
@@ -48,3 +48,4 @@ script:
   - cargo build --verbose --all-features
   - cargo test --verbose --all-features
   - cargo doc --verbose --all-features --no-deps
+

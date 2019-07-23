@@ -12,8 +12,7 @@ categories = ["cryptography", "algorithms"]
 readme = "README.md"
 
 [dependencies]
-ring = "^0.13.0"
-rand = "^0.5.0"
+ring = "^0.16.1"
 
 [package.metadata.release]
 sign-commit = true

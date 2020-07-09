@@ -15,7 +15,7 @@ matrix:
       rust: nightly
 
     - env: NAME='clippy'
-      rust: nightly-2019-07-19
+      rust: stable
       before_script:
         - rustup component add clippy
       script:

@@ -13,7 +13,7 @@ readme        = "README.md"
 edition       = "2018"
 
 [dependencies]
-ring = "^0.16.1"
+ring = "0.16.15"
 
 [package.metadata.release]
 sign-commit                = true

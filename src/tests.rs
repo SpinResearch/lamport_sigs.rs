@@ -1,7 +1,7 @@
 use ring::digest::{Algorithm, SHA256, SHA512};
 
-use PrivateKey;
-use PublicKey;
+use crate::PrivateKey;
+use crate::PublicKey;
 
 static DIGEST_256: &Algorithm = &SHA256;
 static DIGEST_512: &Algorithm = &SHA512;

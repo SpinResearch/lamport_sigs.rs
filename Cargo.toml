@@ -10,6 +10,7 @@ repository    = "https://github.com/SpinResearch/lamport_sigs.rs"
 keywords      = ["lamport", "signature-scheme"]
 categories    = ["cryptography", "algorithms"]
 readme        = "README.md"
+edition       = "2018"
 
 [dependencies]
 ring = "^0.16.1"

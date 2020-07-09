@@ -1,25 +1,25 @@
 [package]
-name = "lamport_sigs"
-version = "0.7.1-pre"
-authors = ["Frederic Jacobs <github@fredericjacobs.com>"]
-description = "Implementation of the Lamport one-time signature scheme."
-license = "BSD-3-Clause"
+name          = "lamport_sigs"
+version       = "0.7.1-pre"
+authors       = ["Frederic Jacobs <github@fredericjacobs.com>"]
+description   = "Implementation of the Lamport one-time signature scheme."
+license       = "BSD-3-Clause"
 documentation = "https://spinresearch.github.io/lamport_sigs.rs/lamport_sigs/index.html"
-homepage = "https://github.com/SpinResearch/lamport_sigs.rs"
-repository = "https://github.com/SpinResearch/lamport_sigs.rs"
-keywords = ["lamport", "signature-scheme"]
-categories = ["cryptography", "algorithms"]
-readme = "README.md"
+homepage      = "https://github.com/SpinResearch/lamport_sigs.rs"
+repository    = "https://github.com/SpinResearch/lamport_sigs.rs"
+keywords      = ["lamport", "signature-scheme"]
+categories    = ["cryptography", "algorithms"]
+readme        = "README.md"
 
 [dependencies]
 ring = "^0.16.1"
 
 [package.metadata.release]
-sign-commit = true
-upload-doc = true
-doc-branch = "gh-pages"
+sign-commit                = true
+upload-doc                 = true
+doc-branch                 = "gh-pages"
 pre-release-commit-message = "Release version {{version}}."
 pro-release-commit-message = "Start next development iteration {{version}}."
-tag-message = "Release version {{version}}."
-doc-commit-message = "Update documentation."
-dev-version-ext = "pre"
+tag-message                = "Release version {{version}}."
+doc-commit-message         = "Update documentation."
+dev-version-ext            = "pre"
